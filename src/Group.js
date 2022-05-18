@@ -23,6 +23,8 @@ export default class Group {
     this.items.forEach(obj => obj.draw(context));
   }
 
-  update() {}
+  update(delta) {
+    this.items.forEach(obj => obj.update(delta));
+  }
 
 }

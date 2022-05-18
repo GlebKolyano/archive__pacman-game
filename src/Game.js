@@ -7,6 +7,7 @@ export default class Game {
     this.context = this.canvas.getContext('2d');
 
     this.store = new Group;
+    this.prevTimestamp = 0;
 
     this.canvas.width = props.width ?? 0;
     this.canvas.height = props.height ?? 0;
@@ -28,9 +29,13 @@ export default class Game {
   render(timestamp) {
     requestAnimationFrame(timestamp => this.render(timestamp));
 
+    const delta = timestamp - this.prevTimestamp;
+    this.prevTimestamp = timestamp;
+    
     this.clear();
     this.draw();
 
     this.store.draw(this.context);
+    this.store.update(delta);
   }
 }
