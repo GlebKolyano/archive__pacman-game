@@ -56,7 +56,25 @@ export default async function main() {
 
   pacman.startAnimation('right');
 
+  const ghosts = ['red', 'pink', 'turquoise', 'banana']
+    .map(color => {
+      const ghost = new Cinematic({
+        image,
+        x: atlas.position[color].x * scale,
+        y: atlas.position[color].y * scale,
+        width: 13 * scale,
+        height: 13 * scale,
+
+        frame: atlas.position[color],
+
+        animations: atlas[`${color}Ghost`]
+      });
+      ghost.startAnimation(atlas.position[color].direction);
+      return ghost;
+    })
+
   foods.forEach(food => game.store.add(food));
+  ghosts.forEach(ghost => game.store.add(ghost));
   game.store.add(maze);
   game.store.add(pacman);
 }
