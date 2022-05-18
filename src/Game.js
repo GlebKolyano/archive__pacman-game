@@ -1,8 +1,12 @@
+import Group from "./Group.js";
+
 export default class Game {
   constructor(props = {}) {
     
     this.canvas = document.createElement('canvas');
     this.context = this.canvas.getContext('2d');
+
+    this.store = new Group;
 
     this.canvas.width = props.width ?? 0;
     this.canvas.height = props.height ?? 0;
@@ -23,8 +27,10 @@ export default class Game {
 
   render(timestamp) {
     requestAnimationFrame(timestamp => this.render(timestamp));
-    
+
     this.clear();
     this.draw();
+
+    this.store.draw(this.context);
   }
 }
