@@ -1,6 +1,6 @@
 export default class Group {
   constructor(props = {}) {
-    this.container = new Set;
+    this.container = new Set();
   }
 
   get items() {
@@ -20,7 +20,7 @@ export default class Group {
   }
 
   draw(context) {
-    this.container.forEach(obj => obj.draw());
+    this.items.forEach(obj => obj.draw(context));
   }
 
   update() {}
