@@ -42,7 +42,6 @@ export default async function main() {
     y: atlas.position.leftPortal.y * scale,
     width: atlas.position.leftPortal.width * scale,
     height: atlas.position.leftPortal.height * scale,
-    debug: true,
   });
 
   const rightPortal = new DisplayObject({
@@ -50,7 +49,6 @@ export default async function main() {
     y: atlas.position.rightPortal.y * scale,
     width: atlas.position.rightPortal.width * scale,
     height: atlas.position.rightPortal.height * scale,
-    debug: true,
   });
 
   let foods = atlas.maze.foods.map((food) => new Sprite({
@@ -72,8 +70,8 @@ export default async function main() {
     height: 15 * scale,
 
     animations: atlas.pacman,
-    debug: true,
-    speedX: 1,
+  
+    speedX: 2,
   });
   pacman.direction = 'right';
   pacman.startAnimation('right');
@@ -148,7 +146,7 @@ export default async function main() {
         spriteObj.nextDirection = null;
         spriteObj.startAnimation('up');
         spriteObj.speedX = 0;
-        spriteObj.speedY = -1;
+        spriteObj.speedY = -2;
       }
       spriteObj.y += 10;
     } else if (spriteObj.nextDirection === 'down') {
@@ -157,7 +155,7 @@ export default async function main() {
         spriteObj.nextDirection = null;
         spriteObj.startAnimation('down');
         spriteObj.speedX = 0;
-        spriteObj.speedY = 1;
+        spriteObj.speedY = 2;
       }
       spriteObj.y -= 10;
     } else if (spriteObj.nextDirection === 'left') {
@@ -165,7 +163,7 @@ export default async function main() {
       if (!getWallCollision(spriteObj)) {
         spriteObj.nextDirection = null;
         spriteObj.startAnimation('left');
-        spriteObj.speedX = -1;
+        spriteObj.speedX = -2;
         spriteObj.speedY = 0;
       }
       spriteObj.x += 10;
@@ -174,7 +172,7 @@ export default async function main() {
       if (!getWallCollision(spriteObj)) {
         spriteObj.nextDirection = null;
         spriteObj.startAnimation('right');
-        spriteObj.speedX = 1;
+        spriteObj.speedX = 2;
         spriteObj.speedY = 0;
       }
       spriteObj.x -= 10;
@@ -233,8 +231,10 @@ export default async function main() {
           pacman.startAnimation('die', {
             onEnd() {
               pacman.play = false;
-              pacman.stopAnimation();
-              game.store.remove(pacman);
+              setTimeout(() => {
+                pacman.stopAnimation();
+                game.store.remove(pacman);
+              }, 1500);
             },
           });
         }
@@ -261,7 +261,8 @@ export default async function main() {
       if (isCollision(pacman, tablet)) {
         tablets.splice(i, 1);
         game.store.remove(tablet);
-        ghosts.forEach((ghost) => {
+        ghosts.forEach((g) => {
+          const ghost = g;
           ghost.originalAnimations = ghost.collectionAnimations;
           ghost.collectionAnimations = atlas.blueGhost;
           ghost.startAnimation(ghost.currentAnimation.name);
@@ -269,7 +270,8 @@ export default async function main() {
         });
 
         setTimeout(() => {
-          ghosts.forEach((ghost) => {
+          ghosts.forEach((g) => {
+            const ghost = g;
             ghost.collectionAnimations = ghost.originalAnimations;
             ghost.startAnimation(ghost.currentAnimation.name);
             ghost.isBlue = false;
