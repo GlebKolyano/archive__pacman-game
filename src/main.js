@@ -1,7 +1,7 @@
-import Cinematic from "./Cinematic.js";
-import Game from "./Game.js";
-import Loader from "./Loader.js";
-import Sprite from "./Sprite.js";
+import Cinematic from './Cinematic.js';
+import Game from './Game.js';
+import { loadImage, loadJSON } from './Loader.js';
+import Sprite from './Sprite.js';
 
 const scale = 2;
 
@@ -13,8 +13,8 @@ export default async function main() {
   document.body.append(game.canvas);
   document.body.style.backgroundColor = 'gray';
 
-  const image = await Loader.loadImage('../sets/spritesheet.png');
-  const atlas = await Loader.loadJSON('../sets/atlas.json');
+  const image = await loadImage('../sets/spritesheet.png');
+  const atlas = await loadJSON('../sets/atlas.json');
 
   const maze = new Sprite({
     image,
@@ -30,18 +30,16 @@ export default async function main() {
   game.canvas.width = maze.width;
   game.canvas.height = maze.height;
 
-  const foods = atlas.maze.foods.map(food => {
-    return new Sprite({
-      image,
+  const foods = atlas.maze.foods.map((food) => new Sprite({
+    image,
 
-      x: food.x * scale,
-      y: food.y * scale,
-      width: food.width * scale,
-      height: food.height * scale,
+    x: food.x * scale,
+    y: food.y * scale,
+    width: food.width * scale,
+    height: food.height * scale,
 
-      frame: atlas.food
-    });
-  });
+    frame: atlas.food,
+  }));
 
   const pacman = new Cinematic({
     image,
@@ -52,12 +50,12 @@ export default async function main() {
 
     animations: atlas.pacman,
     debug: true,
-  })
+  });
 
   pacman.startAnimation('right');
 
   const ghosts = ['red', 'pink', 'turquoise', 'banana']
-    .map(color => {
+    .map((color) => {
       const ghost = new Cinematic({
         image,
         x: atlas.position[color].x * scale,
@@ -67,14 +65,14 @@ export default async function main() {
 
         frame: atlas.position[color],
 
-        animations: atlas[`${color}Ghost`]
+        animations: atlas[`${color}Ghost`],
       });
       ghost.startAnimation(atlas.position[color].direction);
       return ghost;
-    })
+    });
 
-  foods.forEach(food => game.store.add(food));
-  ghosts.forEach(ghost => game.store.add(ghost));
+  foods.forEach((food) => game.store.add(food));
+  ghosts.forEach((ghost) => game.store.add(ghost));
   game.store.add(maze);
   game.store.add(pacman);
 }

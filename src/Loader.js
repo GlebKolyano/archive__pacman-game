@@ -9,10 +9,10 @@ export function loadImage(src) {
 
 export async function loadJSON(src) {
   const data = await fetch(src);
-  return await data.json();
+  return data.json();
 }
 
 export default {
   loadImage,
-  loadJSON
-}
+  loadJSON,
+};

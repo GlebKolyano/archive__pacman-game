@@ -1,4 +1,4 @@
-import DisplayObject from "./DisplayObject.js";
+import DisplayObject from './DisplayObject.js';
 
 export default class Sprite extends DisplayObject {
   constructor(props = {}) {
@@ -7,23 +7,22 @@ export default class Sprite extends DisplayObject {
     this.image = props.image ?? null;
     this.frame = props.frame ?? null;
     this.debug = props.debug ?? false;
-  
   }
 
   draw(context) {
     context.drawImage(
       this.image,
 
-      this.frame.x, 
-      this.frame.y, 
-      this.frame.width, 
+      this.frame.x,
+      this.frame.y,
+      this.frame.width,
       this.frame.height,
 
-      this.x, 
-      this.y, 
-      this.width, 
+      this.x,
+      this.y,
+      this.width,
       this.height,
-    )
+    );
 
     if (this.debug) {
       context.beginPath();
@@ -37,6 +36,4 @@ export default class Sprite extends DisplayObject {
       context.stroke();
     }
   }
-
-  update() {}
 }

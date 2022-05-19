@@ -1,5 +1,5 @@
 export default class Group {
-  constructor(props = {}) {
+  constructor() {
     this.container = new Set();
   }
 
@@ -8,23 +8,18 @@ export default class Group {
   }
 
   add(...objects) {
-    for (const object of objects) {
-      this.container.add(object);
-    }
+    objects.forEach((obj) => this.container.add(obj));
   }
 
   remove(...objects) {
-    for (const object of objects) {
-      this.container.delete(object);
-    }
+    objects.forEach((obj) => this.container.delete(obj));
   }
 
   draw(context) {
-    this.items.forEach(obj => obj.draw(context));
+    this.items.forEach((obj) => obj.draw(context));
   }
 
   update(delta) {
-    this.items.forEach(obj => obj.update(delta));
+    this.items.forEach((obj) => obj.update(delta));
   }
-
 }
