@@ -70,7 +70,7 @@ export default async function main() {
     height: 15 * scale,
 
     animations: atlas.pacman,
-  
+
     speedX: 2,
   });
   pacman.direction = 'right';
@@ -207,15 +207,15 @@ export default async function main() {
         ghost.speedY = 0;
       }
 
-      if (ghost.speedX === 0 && ghost.speedY === 0) {
+      if ((ghost.speedX === 0 && ghost.speedY === 0) || Math.random() > 0.95) {
         if (ghost.currentAnimation.name.match('up')) {
-          ghost.nextDirection = getRandomItemFrom(['down', 'left', 'right']);
+          ghost.nextDirection = getRandomItemFrom(['left', 'right']);
         } else if (ghost.currentAnimation.name.match('down')) {
-          ghost.nextDirection = getRandomItemFrom(['up', 'left', 'right']);
+          ghost.nextDirection = getRandomItemFrom(['left', 'right']);
         } else if (ghost.currentAnimation.name.match('left')) {
-          ghost.nextDirection = getRandomItemFrom(['down', 'up', 'right']);
+          ghost.nextDirection = getRandomItemFrom(['down', 'up']);
         } else if (ghost.currentAnimation.name.match('right')) {
-          ghost.nextDirection = getRandomItemFrom(['down', 'left', 'up']);
+          ghost.nextDirection = getRandomItemFrom(['down', 'up']);
         }
       }
       // check collision ghost with pacman
@@ -225,6 +225,7 @@ export default async function main() {
           ghost.speedX = 0;
           ghost.speedY = 0;
           game.store.remove(ghost);
+          ghosts.splice(ghosts.indexOf(ghost), 1);
         } else {
           pacman.speedX = 0;
           pacman.speedY = 0;
@@ -248,13 +249,22 @@ export default async function main() {
       pacman.speedX = 0;
       pacman.speedY = 0;
     }
-
+    // portals
     if (isCollision(pacman, leftPortal)) {
       pacman.x = (rightPortal.x - pacman.width);
     }
     if (isCollision(pacman, rightPortal)) {
       pacman.x = (leftPortal.x + pacman.width);
     }
+    ghosts.forEach((g) => {
+      const ghost = g;
+      if (isCollision(ghost, leftPortal)) {
+        ghost.x = (rightPortal.x - ghost.width);
+      }
+      if (isCollision(ghost, rightPortal)) {
+        ghost.x = (leftPortal.x + ghost.width);
+      }
+    });
     // collision tablets
     for (let i = 0; i < tablets.length; i += 1) {
       const tablet = tablets[i];
