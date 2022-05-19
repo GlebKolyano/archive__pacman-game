@@ -6,7 +6,19 @@ export default class Sprite extends DisplayObject {
 
     this.image = props.image ?? null;
     this.frame = props.frame ?? null;
-    this.debug = props.debug ?? false;
+
+    this.nextDirection = null;
+    this.speedX = props.speedX ?? 0;
+    this.speedY = props.speedY ?? 0;
+  }
+
+  getNextPosition() {
+    return {
+      x: this.x + this.speedX,
+      y: this.y + this.speedY,
+      width: this.width,
+      height: this.height,
+    };
   }
 
   draw(context) {
@@ -23,17 +35,10 @@ export default class Sprite extends DisplayObject {
       this.width,
       this.height,
     );
+  }
 
-    if (this.debug) {
-      context.beginPath();
-      context.rect(this.x, this.y, this.width, this.height);
-      context.fillStyle = 'rgb(0, 255, 0, 0.3)';
-      context.fill();
-
-      context.beginPath();
-      context.rect(this.x, this.y, this.width, this.height);
-      context.strokeStyle = 'rgb(0, 255, 0, 0.3)';
-      context.stroke();
-    }
+  update(delta) {
+    this.x += this.speedX;
+    this.y += this.speedY;
   }
 }

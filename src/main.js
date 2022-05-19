@@ -1,4 +1,6 @@
+import { isCollision } from './Additional.js';
 import Cinematic from './Cinematic.js';
+import DisplayObject from './DisplayObject.js';
 import Game from './Game.js';
 import { loadImage, loadJSON } from './Loader.js';
 import Sprite from './Sprite.js';
@@ -26,9 +28,15 @@ export default async function main() {
 
     frame: atlas.maze,
   });
-
   game.canvas.width = maze.width;
   game.canvas.height = maze.height;
+
+  const walls = atlas.maze.walls.map((wall) => new DisplayObject({
+    x: wall.x * scale,
+    y: wall.y * scale,
+    width: wall.width * scale,
+    height: wall.height * scale,
+  }));
 
   const foods = atlas.maze.foods.map((food) => new Sprite({
     image,
@@ -50,8 +58,9 @@ export default async function main() {
 
     animations: atlas.pacman,
     debug: true,
+    speedX: 1,
   });
-
+  pacman.direction = 'right';
   pacman.startAnimation('right');
 
   const ghosts = ['red', 'pink', 'turquoise', 'banana']
@@ -73,6 +82,83 @@ export default async function main() {
 
   foods.forEach((food) => game.store.add(food));
   ghosts.forEach((ghost) => game.store.add(ghost));
+  walls.forEach((wall) => game.store.add(wall));
   game.store.add(maze);
   game.store.add(pacman);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code.match('ArrowUp')) {
+      pacman.nextDirection = 'up';
+    } else if (e.code.match('ArrowDown')) {
+      pacman.nextDirection = 'down';
+    } else if (e.code.match('ArrowLeft')) {
+      pacman.nextDirection = 'left';
+    } else if (e.code.match('ArrowRight')) {
+      pacman.nextDirection = 'right';
+    }
+  });
+
+  function getWallCollision(obj) {
+    for (const wall of walls) {
+      if (isCollision(wall, obj)) {
+        return wall;
+      }
+    }
+    return null;
+  }
+
+  function defineDirectionObject(obj) {
+    const spriteObj = obj;
+    if (!spriteObj.nextDirection) {
+      return;
+    }
+    if (spriteObj.nextDirection === 'up') {
+      spriteObj.y -= 10;
+      if (!getWallCollision(spriteObj)) {
+        spriteObj.nextDirection = null;
+        spriteObj.startAnimation('up');
+        spriteObj.speedX = 0;
+        spriteObj.speedY = -1;
+      }
+      spriteObj.y += 10;
+    } else if (spriteObj.nextDirection === 'down') {
+      spriteObj.y += 10;
+      if (!getWallCollision(spriteObj)) {
+        spriteObj.nextDirection = null;
+        spriteObj.startAnimation('down');
+        spriteObj.speedX = 0;
+        spriteObj.speedY = 1;
+      }
+      spriteObj.y -= 10;
+    } else if (spriteObj.nextDirection === 'left') {
+      spriteObj.x -= 10;
+      if (!getWallCollision(spriteObj)) {
+        spriteObj.nextDirection = null;
+        spriteObj.startAnimation('left');
+        spriteObj.speedX = -1;
+        spriteObj.speedY = 0;
+      }
+      spriteObj.x += 10;
+    } else if (spriteObj.nextDirection === 'right') {
+      spriteObj.x += 10;
+      if (!getWallCollision(spriteObj)) {
+        spriteObj.nextDirection = null;
+        spriteObj.startAnimation('right');
+        spriteObj.speedX = 1;
+        spriteObj.speedY = 0;
+      }
+      spriteObj.x -= 10;
+    }
+  }
+
+  game.update = () => {
+    // check collision pacman with wall
+    const wall = getWallCollision(pacman.getNextPosition());
+    if (wall) {
+      pacman.startAnimation(`wait${pacman.currentAnimation.name}`);
+      pacman.speedX = 0;
+      pacman.speedY = 0;
+    }
+    defineDirectionObject(pacman);
+  };
 }

@@ -22,6 +22,8 @@ export default class Game {
     this.context.fill();
   }
 
+  update() {}
+
   render(timestamp) {
     requestAnimationFrame((time) => this.render(time));
 
@@ -29,6 +31,7 @@ export default class Game {
     this.prevTimestamp = timestamp;
 
     this.draw();
+    this.update();
 
     this.store.draw(this.context);
     this.store.update(delta);

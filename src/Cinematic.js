@@ -24,6 +24,7 @@ export default class Cinematic extends Sprite {
   }
 
   update(delta) {
+    super.update(delta);
     this.timer += delta;
 
     if (this.timer >= this.cooldown) {
