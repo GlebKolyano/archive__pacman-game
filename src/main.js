@@ -37,8 +37,23 @@ export default async function main() {
     width: wall.width * scale,
     height: wall.height * scale,
   }));
+  const leftPortal = new DisplayObject({
+    x: atlas.position.leftPortal.x * scale,
+    y: atlas.position.leftPortal.y * scale,
+    width: atlas.position.leftPortal.width * scale,
+    height: atlas.position.leftPortal.height * scale,
+    debug: true,
+  });
 
-  const foods = atlas.maze.foods.map((food) => new Sprite({
+  const rightPortal = new DisplayObject({
+    x: atlas.position.rightPortal.x * scale,
+    y: atlas.position.rightPortal.y * scale,
+    width: atlas.position.rightPortal.width * scale,
+    height: atlas.position.rightPortal.height * scale,
+    debug: true,
+  });
+
+  let foods = atlas.maze.foods.map((food) => new Sprite({
     image,
 
     x: food.x * scale,
@@ -79,11 +94,23 @@ export default async function main() {
       ghost.startAnimation(atlas.position[color].direction);
       return ghost;
     });
+  const tablets = atlas.position.tablets.map((tablet) => new Sprite({
+    image,
+    x: tablet.x * scale,
+    y: tablet.y * scale,
+    width: tablet.width * scale,
+    height: tablet.height * scale,
+
+    frame: atlas.tablet,
+  }));
 
   foods.forEach((food) => game.store.add(food));
   ghosts.forEach((ghost) => game.store.add(ghost));
   walls.forEach((wall) => game.store.add(wall));
+  tablets.forEach((tablet) => game.store.add(tablet));
   game.store.add(maze);
+  game.store.add(rightPortal);
+  game.store.add(leftPortal);
   game.store.add(pacman);
 
   document.addEventListener('keydown', (e) => {
@@ -151,7 +178,22 @@ export default async function main() {
     }
   }
 
+  function eatFood() {
+    const eatedFood = [];
+
+    foods.forEach((food) => {
+      if (isCollision(pacman, food)) {
+        eatedFood.push(food);
+        game.store.remove(food);
+      }
+    });
+
+    foods = foods.filter((food) => !eatedFood.includes(food));
+  }
+
   game.update = () => {
+    eatFood();
+    defineDirectionObject(pacman);
     // check collision pacman with wall
     const wall = getWallCollision(pacman.getNextPosition());
     if (wall) {
@@ -159,6 +201,35 @@ export default async function main() {
       pacman.speedX = 0;
       pacman.speedY = 0;
     }
-    defineDirectionObject(pacman);
+
+    if (isCollision(pacman, leftPortal)) {
+      pacman.x = (rightPortal.x - pacman.width);
+    }
+    if (isCollision(pacman, rightPortal)) {
+      pacman.x = (leftPortal.x + pacman.width);
+    }
+    // collision tablets
+    for (let i = 0; i < tablets.length; i++) {
+      const tablet = tablets[i];
+      if (isCollision(pacman, tablet)) {
+        tablets.splice(i, 1);
+        game.store.remove(tablet);
+        ghosts.forEach((ghost) => {
+          ghost.originalAnimations = ghost.collectionAnimations;
+          ghost.collectionAnimations = atlas.blueGhost;
+          ghost.startAnimation(ghost.currentAnimation.name);
+          ghost.isBlue = true;
+        });
+
+        setTimeout(() => {
+          ghosts.forEach((ghost) => {
+            ghost.collectionAnimations = ghost.originalAnimations;
+            ghost.startAnimation(ghost.currentAnimation.name);
+            ghost.isBlue = false;
+          });
+        }, 5000);
+        break;
+      }
+    }
   };
 }
