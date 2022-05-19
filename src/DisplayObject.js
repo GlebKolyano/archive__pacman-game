@@ -1,4 +1,6 @@
 export default class DisplayObject {
+  play = true;
+
   constructor(props = {}) {
     this.x = props.x ?? 0;
     this.y = props.y ?? 0;

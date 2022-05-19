@@ -35,9 +35,10 @@ export default class Sprite extends DisplayObject {
       this.width,
       this.height,
     );
+    super.draw(context);
   }
 
-  update(delta) {
+  update() {
     this.x += this.speedX;
     this.y += this.speedY;
   }

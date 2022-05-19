@@ -1,4 +1,4 @@
-import { isCollision } from './Additional.js';
+import { getRandomItemFrom, isCollision } from './Additional.js';
 import Cinematic from './Cinematic.js';
 import DisplayObject from './DisplayObject.js';
 import Game from './Game.js';
@@ -68,8 +68,8 @@ export default async function main() {
     image,
     x: atlas.position.pacman.x * scale,
     y: atlas.position.pacman.y * scale,
-    width: 13 * scale,
-    height: 13 * scale,
+    width: 15 * scale,
+    height: 15 * scale,
 
     animations: atlas.pacman,
     debug: true,
@@ -84,14 +84,17 @@ export default async function main() {
         image,
         x: atlas.position[color].x * scale,
         y: atlas.position[color].y * scale,
-        width: 13 * scale,
-        height: 13 * scale,
+        width: 14 * scale,
+        height: 14 * scale,
 
         frame: atlas.position[color],
 
         animations: atlas[`${color}Ghost`],
       });
       ghost.startAnimation(atlas.position[color].direction);
+      ghost.nextDirection = atlas.position[color].direction;
+      ghost.isBlue = false;
+
       return ghost;
     });
   const tablets = atlas.position.tablets.map((tablet) => new Sprite({
@@ -194,6 +197,50 @@ export default async function main() {
   game.update = () => {
     eatFood();
     defineDirectionObject(pacman);
+    ghosts.forEach((ghost) => defineDirectionObject(ghost));
+    // check collision ghost with wall
+    ghosts.forEach((g) => {
+      const ghost = g;
+      if (!ghost.play) return;
+
+      const wall = getWallCollision(ghost.getNextPosition());
+      if (wall) {
+        ghost.speedX = 0;
+        ghost.speedY = 0;
+      }
+
+      if (ghost.speedX === 0 && ghost.speedY === 0) {
+        if (ghost.currentAnimation.name.match('up')) {
+          ghost.nextDirection = getRandomItemFrom(['down', 'left', 'right']);
+        } else if (ghost.currentAnimation.name.match('down')) {
+          ghost.nextDirection = getRandomItemFrom(['up', 'left', 'right']);
+        } else if (ghost.currentAnimation.name.match('left')) {
+          ghost.nextDirection = getRandomItemFrom(['down', 'up', 'right']);
+        } else if (ghost.currentAnimation.name.match('right')) {
+          ghost.nextDirection = getRandomItemFrom(['down', 'left', 'up']);
+        }
+      }
+      // check collision ghost with pacman
+      if (pacman.play && ghost.play && isCollision(ghost, pacman)) {
+        if (ghost.isBlue) {
+          ghost.play = false;
+          ghost.speedX = 0;
+          ghost.speedY = 0;
+          game.store.remove(ghost);
+        } else {
+          pacman.speedX = 0;
+          pacman.speedY = 0;
+          pacman.startAnimation('die', {
+            onEnd() {
+              pacman.play = false;
+              pacman.stopAnimation();
+              game.store.remove(pacman);
+            },
+          });
+        }
+      }
+    });
+
     // check collision pacman with wall
     const wall = getWallCollision(pacman.getNextPosition());
     if (wall) {
@@ -209,7 +256,7 @@ export default async function main() {
       pacman.x = (leftPortal.x + pacman.width);
     }
     // collision tablets
-    for (let i = 0; i < tablets.length; i++) {
+    for (let i = 0; i < tablets.length; i += 1) {
       const tablet = tablets[i];
       if (isCollision(pacman, tablet)) {
         tablets.splice(i, 1);
