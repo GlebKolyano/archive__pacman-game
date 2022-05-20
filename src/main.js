@@ -32,8 +32,8 @@ export default async function main() {
   document.body.append(game.canvas);
   document.body.style.backgroundColor = 'black';
 
-  const image = await loadImage('../sets/spritesheet.png');
-  const atlas = await loadJSON('../sets/atlas.json');
+  const image = await loadImage('https://glebkolyano.github.io/pacmanGame/sets/spritesheet.png');
+  const atlas = await loadJSON('https://glebkolyano.github.io/pacmanGame/sets/atlas.json');
 
   const maze = new Sprite({
     image,
