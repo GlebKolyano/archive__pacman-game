@@ -2,18 +2,35 @@ import { getRandomItemFrom, isCollision } from './Additional.js';
 import Cinematic from './Cinematic.js';
 import DisplayObject from './DisplayObject.js';
 import Game from './Game.js';
+import Group from './Group.js';
 import { loadImage, loadJSON } from './Loader.js';
 import Sprite from './Sprite.js';
+import TextUI from './TextUI.js';
 
 const scale = 2;
 
 export default async function main() {
   const game = new Game({
+    width: window.screen.availWidth,
+    height: window.screen.availHeight,
     backgroundColor: 'black',
   });
 
+  const party = new Group();
+  party.offsetX = window.innerWidth / 2 - 225;
+  game.store.add(party);
+
+  const status = new TextUI({
+    content: 'points: 0',
+    fill: 'white',
+    x: window.innerWidth / 2 - 325,
+    y: 50,
+  });
+  status.points = 0;
+  game.store.add(status);
+
   document.body.append(game.canvas);
-  document.body.style.backgroundColor = 'gray';
+  document.body.style.backgroundColor = 'black';
 
   const image = await loadImage('../sets/spritesheet.png');
   const atlas = await loadJSON('../sets/atlas.json');
@@ -28,8 +45,6 @@ export default async function main() {
 
     frame: atlas.maze,
   });
-  game.canvas.width = maze.width;
-  game.canvas.height = maze.height;
 
   const walls = atlas.maze.walls.map((wall) => new DisplayObject({
     x: wall.x * scale,
@@ -105,14 +120,14 @@ export default async function main() {
     frame: atlas.tablet,
   }));
 
-  foods.forEach((food) => game.store.add(food));
-  ghosts.forEach((ghost) => game.store.add(ghost));
-  walls.forEach((wall) => game.store.add(wall));
-  tablets.forEach((tablet) => game.store.add(tablet));
-  game.store.add(maze);
-  game.store.add(rightPortal);
-  game.store.add(leftPortal);
-  game.store.add(pacman);
+  foods.forEach((food) => party.add(food));
+  ghosts.forEach((ghost) => party.add(ghost));
+  walls.forEach((wall) => party.add(wall));
+  tablets.forEach((tablet) => party.add(tablet));
+  party.add(maze);
+  party.add(rightPortal);
+  party.add(leftPortal);
+  party.add(pacman);
 
   document.addEventListener('keydown', (e) => {
     if (e.code.match('ArrowUp')) {
@@ -185,7 +200,9 @@ export default async function main() {
     foods.forEach((food) => {
       if (isCollision(pacman, food)) {
         eatedFood.push(food);
-        game.store.remove(food);
+        party.remove(food);
+        status.points += 1;
+        status.content = `points: ${status.points}`;
       }
     });
 
@@ -224,7 +241,9 @@ export default async function main() {
           ghost.play = false;
           ghost.speedX = 0;
           ghost.speedY = 0;
-          game.store.remove(ghost);
+          status.points += 10;
+          status.content = `points: ${status.points}`;
+          party.remove(ghost);
           ghosts.splice(ghosts.indexOf(ghost), 1);
         } else {
           pacman.speedX = 0;
@@ -234,7 +253,7 @@ export default async function main() {
               pacman.play = false;
               setTimeout(() => {
                 pacman.stopAnimation();
-                game.store.remove(pacman);
+                party.remove(pacman);
               }, 1500);
             },
           });
@@ -270,7 +289,7 @@ export default async function main() {
       const tablet = tablets[i];
       if (isCollision(pacman, tablet)) {
         tablets.splice(i, 1);
-        game.store.remove(tablet);
+        party.remove(tablet);
         ghosts.forEach((g) => {
           const ghost = g;
           ghost.originalAnimations = ghost.collectionAnimations;

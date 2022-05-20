@@ -1,6 +1,9 @@
 export default class Group {
   constructor() {
     this.container = new Set();
+
+    this.offsetX = 0;
+    this.offsetY = 10;
   }
 
   get items() {
@@ -16,7 +19,10 @@ export default class Group {
   }
 
   draw(context) {
+    context.save();
+    context.translate(this.offsetX, this.offsetY);
     this.items.forEach((obj) => obj.draw(context));
+    context.restore();
   }
 
   update(delta) {
